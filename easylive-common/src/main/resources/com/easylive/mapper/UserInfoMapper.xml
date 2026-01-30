@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.easylive.mapper.UserInfoMapper">
+
+	<update id="updateById" parameterType="com.easylive.entity.po.UserInfo">
+		update user_info
+		<set>
+			<if test="nickName != null">nick_name=#{nickName},</if>
+			<if test="email != null">email=#{email},</if>
+			<if test="password != null">password=#{password},</if>
+			<if test="sex != null">sex=#{sex},</if>
+			<if test="birthday != null">birthday=#{birthday},</if>
+			<if test="school != null">school=#{school},</if>
+			<if test="personIntroduction != null">person_introduction=#{personIntroduction},</if>
+			<if test="joinTime != null">join_time=#{joinTime},</if>
+			<if test="lastLoginTime != null">last_login_time=#{lastLoginTime},</if>
+			<if test="lastLoginIp != null">last_login_ip=#{lastLoginIp},</if>
+			<if test="status != null">status=#{status},</if>
+			<if test="noticeInfo != null">notice_info=#{noticeInfo},</if>
+			<if test="totalCoinCount != null">total_coin_count=#{totalCoinCount},</if>
+			<if test="currentCoinCount != null">current_coin_count=#{currentCoinCount},</if>
+			<if test="theme != null">theme=#{theme},</if>
+		</set>
+		where user_id=#{userId}
+	</update>
+</mapper>
