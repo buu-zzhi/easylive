@@ -4,12 +4,13 @@ import com.easylive.component.RedisComponent;
 import com.easylive.entity.constants.Constants;
 import com.easylive.entity.constants.ExceptionConstants;
 import com.easylive.entity.dto.TokenUserInfoDto;
+import com.easylive.entity.vo.ResponseVO;
 import com.easylive.exception.BaseException;
-import com.easylive.result.Result;
 import com.easylive.service.UserInfoService;
 import com.easylive.utils.StringTools;
 import com.wf.captcha.SpecCaptcha;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.Response;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,7 +38,7 @@ public class AccountController extends ABaseController {
     private RedisComponent redisComponent;
 
     @RequestMapping("/checkCode")
-    public Result checkCode() {
+    public ResponseVO checkCode() {
         // 改用 SpecCaptcha 或 GiftCaptcha，它们不使用 ScriptEngine
         SpecCaptcha captcha = new SpecCaptcha(130, 48, 5);
         String code = captcha.text();
@@ -46,11 +47,11 @@ public class AccountController extends ABaseController {
         Map<String, String> result = new HashMap<>();
         result.put("checkCode", checkCodeBase64);
         result.put("checkCodeKey", checkCodeKey);
-        return Result.success(result);
+        return getSuccessResponseVO(result);
     }
 
     @RequestMapping("/register")
-    public Result register(@NotEmpty @Email @Size(max = 150) String email,
+    public ResponseVO register(@NotEmpty @Email @Size(max = 150) String email,
                            @NotEmpty @Size(max = 20) String nickName,
                            @NotEmpty @Pattern(regexp = Constants.REGEX_PASSWORD) String registerPassword,
                            @NotEmpty String checkCodeKey,
@@ -60,14 +61,14 @@ public class AccountController extends ABaseController {
                 throw new BaseException(ExceptionConstants.CAPTCHA_ERROR);
             }
             userInfoService.register(email, nickName, registerPassword);
-            return Result.success("注册成功");
+            return getSuccessResponseVO(null);
         } finally {
             redisComponent.cleanCheckCode(checkCodeKey);
         }
     }
 
     @RequestMapping("/login")
-    public Result login(HttpServletRequest request, HttpServletResponse response,
+    public ResponseVO login(HttpServletRequest request, HttpServletResponse response,
                         @NotEmpty @Email String email,
                         @NotEmpty String password,
                         @NotEmpty String checkCodeKey,
@@ -80,7 +81,7 @@ public class AccountController extends ABaseController {
             TokenUserInfoDto tokenUserInfoDto = userInfoService.login(email, password, ip);
             saveToken2Cookie(response, tokenUserInfoDto.getToken());
             // TODO 设置粉丝数 硬币数 关注数
-            return Result.success(tokenUserInfoDto);
+            return getSuccessResponseVO(tokenUserInfoDto);
         } finally {
             // 清除验证码 和 删除cookie中已有的管理员token
             redisComponent.cleanCheckCode(checkCodeKey);
@@ -100,22 +101,21 @@ public class AccountController extends ABaseController {
     }
 
     @RequestMapping("/autoLogin")
-    public Result login(HttpServletResponse response) {
+    public ResponseVO autoLogin(HttpServletResponse response) {
         TokenUserInfoDto tokenUserInfoDto = getTokenUserInfoDto();
         if (tokenUserInfoDto == null) {
-            return Result.error(ExceptionConstants.NOT_LOGIN);
+            return getSuccessResponseVO(null);
         }
-        if (tokenUserInfoDto.getExpireAt() - System.currentTimeMillis() < Constants.REDIS_KEY_EXPIRES_ONE_DAY) {
-            redisComponent.saveToKenInfo(tokenUserInfoDto);  //续期
+        if (tokenUserInfoDto.getExpireAt() - System.currentTimeMillis() <Constants.REDIS_KEY_EXPIRES_ONE_DAY) {
+            redisComponent.saveToKenInfo(tokenUserInfoDto);
         }
         saveToken2Cookie(response, tokenUserInfoDto.getToken());
-        // TODO 设置粉丝数 硬币数 关注数
-        return Result.success(tokenUserInfoDto);
+        return getSuccessResponseVO(null);
     }
 
     @RequestMapping("/logout")
-    public Result logout(HttpServletResponse response) {
+    public ResponseVO logout(HttpServletResponse response) {
         cleanCookie(response);
-        return Result.success(null);
+        return getSuccessResponseVO(null);
     }
 }

@@ -2,6 +2,7 @@ package com.easylive.admin.intersecptor;
 
 import com.easylive.component.RedisComponent;
 import com.easylive.entity.constants.Constants;
+import com.easylive.entity.enums.ResponseCodeEnum;
 import com.easylive.entity.enums.ResponseEnum;
 import com.easylive.exception.BaseException;
 import com.easylive.exception.BusinessException;
@@ -39,15 +40,18 @@ public class AppInterceptor implements HandlerInterceptor {
         if (request.getRequestURL().toString().contains(URL_ACCOUNT)) {
             return true;
         }
-        String token = getTokenFromCookie(request);
+        String token = request.getHeader(Constants.TOKEN_ADMIN);
+        if (request.getRequestURL().toString().contains(URL_FILE)) {
+            // 如果是请求是获取图片 没有办法从 header 里拿到，只能从 cookie 中去获取
+            token = getTokenFromCookie(request);
+        }
         if (StringTools.isEmpty(token)) {
-            throw new BusinessException(ResponseEnum.CODE_901);
+            throw new BusinessException(ResponseCodeEnum.CODE_901);
         }
         Object sessionObj = redisComponent.getTokenInfo4Admin(token);
         if (null == sessionObj) {
-            throw new BusinessException(ResponseEnum.CODE_901);
+            throw new BusinessException(ResponseCodeEnum.CODE_901);
         }
-
         return true;
     }
 

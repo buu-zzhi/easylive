@@ -1,9 +1,8 @@
 package com.easylive.controller;
 
 import com.easylive.entity.enums.ResponseEnum;
+import com.easylive.entity.vo.ResponseVO;
 import com.easylive.exception.BusinessException;
-import com.easylive.result.ResponseVO;
-import com.easylive.result.Result;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

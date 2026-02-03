@@ -1,24 +1,48 @@
 package com.easylive.utils;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
+/**
+ * @Description: 时间工具类
+ * @Author: KunSpireUp
+ */
 public class DateUtils {
-    public static final String YYYY_MM_DD = "yyyy-MM-dd";
-    public static final String YYYYMMDD = "yyyy/MM/dd";
 
-    public static String format(Date date, String patten) {
-        return new SimpleDateFormat(patten).format(date);
+    private static final Object lookObj = new Object();
+
+    private static Map<String, ThreadLocal<SimpleDateFormat>> sdfMap = new HashMap<>();
+
+    private static SimpleDateFormat getSdf(final String pattern) {
+        ThreadLocal<SimpleDateFormat> threadLocal = sdfMap.get(pattern);
+        if (threadLocal == null) {
+            synchronized (lookObj) {
+                threadLocal = sdfMap.get(pattern);
+                if (threadLocal == null) {
+                    threadLocal = new ThreadLocal<SimpleDateFormat>() {
+                        @Override
+                        protected SimpleDateFormat initialValue() {
+                            return new SimpleDateFormat(pattern);
+                        }
+                    };
+                }
+            }
+        }
+        return threadLocal.get();
     }
 
-    public static Date parse(String date, String patten) {
-        Date parseDate = null;
+    public static String format(Date date, String pattern) {
+        return getSdf(pattern).format(date);
+    }
+
+    public static Date parse(String date, String pattern) {
         try {
-            parseDate = new SimpleDateFormat(patten).parse(date);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
+            return getSdf(pattern).parse(date);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return parseDate;
+        return null;
     }
 }

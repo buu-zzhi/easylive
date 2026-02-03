@@ -1,31 +1,57 @@
 package com.easylive.mapper;
 
-import com.easylive.entity.po.UserInfo;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
-import org.springframework.stereotype.Repository;
+import org.apache.ibatis.annotations.Param;
 
-@Mapper
-@Repository
-public interface UserInfoMapper {
-	@Select("select * from user_info where user_id=#{id}")
-    UserInfo getById(Long id);
+/**
+ * @Description: 用户信息 Mapper
+ * @Author: false
+ * @Date: 2026/02/01 19:48:05
+ */
+public interface UserInfoMapper<T, P> extends BaseMapper {
 
-    @Select("select * from user_info where email=#{email}")
-    UserInfo getByEmail(String email);
+	/**
+ 	 * 根据 UserId 查询
+ 	 */
+	T selectByUserId(@Param("userId")String userId);
 
-    @Select("select * from user_info where nick_name=#{nickName}")
-    UserInfo getByNickName(String nickName);
+	/**
+ 	 * 根据 UserId 更新
+ 	 */
+	Integer updateByUserId(@Param("bean") T t, @Param("userId")String userId); 
 
-	@Delete("delete from user_info where user_id=#{id}")
-	void deleteById(Long id);
+	/**
+ 	 * 根据 UserId 删除
+ 	 */
+	Integer deleteByUserId(@Param("userId")String userId);
 
-	@Insert("insert into user_info (user_id, nick_name, email, password, sex, birthday, school, person_introduction, join_time, last_login_time, last_login_ip, status, notice_info, total_coin_count, current_coin_count, theme) " +
-		"values (#{userId}, #{nickName}, #{email}, #{password}, #{sex}, #{birthday}, #{school}, #{personIntroduction}, #{joinTime}, #{lastLoginTime}, #{lastLoginIp}, #{status}, #{noticeInfo}, #{totalCoinCount}, #{currentCoinCount}, #{theme})")
-	void insert(UserInfo userInfo);
+	/**
+ 	 * 根据 Email 查询
+ 	 */
+	T selectByEmail(@Param("email")String email);
 
-	void updateById(UserInfo userInfo);
+	/**
+ 	 * 根据 Email 更新
+ 	 */
+	Integer updateByEmail(@Param("bean") T t, @Param("email")String email); 
+
+	/**
+ 	 * 根据 Email 删除
+ 	 */
+	Integer deleteByEmail(@Param("email")String email);
+
+	/**
+ 	 * 根据 NickName 查询
+ 	 */
+	T selectByNickName(@Param("nickName")String nickName);
+
+	/**
+ 	 * 根据 NickName 更新
+ 	 */
+	Integer updateByNickName(@Param("bean") T t, @Param("nickName")String nickName); 
+
+	/**
+ 	 * 根据 NickName 删除
+ 	 */
+	Integer deleteByNickName(@Param("nickName")String nickName);
 
 }

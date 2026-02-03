@@ -3,22 +3,37 @@ package com.easylive.web.controller;
 import com.easylive.component.RedisComponent;
 import com.easylive.entity.constants.Constants;
 import com.easylive.entity.dto.TokenUserInfoDto;
-import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.common.recycler.Recycler;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import com.easylive.entity.vo.ResponseVO;
 
-import javax.annotation.Resource;
-import javax.servlet.ServletRequest;
+import com.easylive.entity.enums.ResponseCodeEnum;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;;import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@Slf4j
+/**
+ * @Description: 信息返回状态
+ * @Author: KunSpireUp
+ * @Date: 3/27/2024 12:24 AM
+ */
 public class ABaseController {
+
+	protected static final String STATUS_SUCCESS = "success";
+
+	protected static final String STATUS_ERROR = "error";
 
     @Resource
     private RedisComponent redisComponent;
+
+	protected <T> ResponseVO getSuccessResponseVO(T t) {
+		ResponseVO<T> responseVO = new ResponseVO<>();
+		responseVO.setStatus(STATUS_SUCCESS);
+		responseVO.setCode(ResponseCodeEnum.CODE_200.getCode());
+		responseVO.setInfo(ResponseCodeEnum.CODE_200.getMsg());
+		responseVO.setData(t);
+		return responseVO;
+	}
 
     protected String getIpAddr() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();

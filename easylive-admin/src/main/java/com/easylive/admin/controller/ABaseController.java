@@ -3,20 +3,37 @@ package com.easylive.admin.controller;
 import com.easylive.component.RedisComponent;
 import com.easylive.entity.constants.Constants;
 import com.easylive.entity.dto.TokenUserInfoDto;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import com.easylive.entity.vo.ResponseVO;;
 
-import javax.annotation.Resource;
+import com.easylive.entity.enums.ResponseCodeEnum;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;;import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@Slf4j
+/**
+ * @Description: 信息返回状态
+ * @Author: KunSpireUp
+ * @Date: 3/27/2024 12:24 AM
+ */
 public class ABaseController {
+
+    protected static final String STATUS_SUCCESS = "success";
+
+    protected static final String STATUS_ERROR = "error";
 
     @Resource
     private RedisComponent redisComponent;
+
+    protected <T> ResponseVO getSuccessResponseVO(T t) {
+        ResponseVO<T> responseVO = new ResponseVO<>();
+        responseVO.setStatus(STATUS_SUCCESS);
+        responseVO.setCode(ResponseCodeEnum.CODE_200.getCode());
+        responseVO.setInfo(ResponseCodeEnum.CODE_200.getMsg());
+        responseVO.setData(t);
+        return responseVO;
+    }
 
     protected String getIpAddr() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
@@ -49,18 +66,28 @@ public class ABaseController {
     }
 
     /**
-     * 重新设置cookie的过期时间
+     * 将 token 保存至 cookie 中
      * @param response
      * @param token
      */
     protected void saveToken2Cookie(HttpServletResponse response, String token) {
         Cookie cookie = new Cookie(Constants.TOKEN_ADMIN, token);
 //        log.info("real class:{}", response.getClass().getName());
+        // 设置为 -1 session 模式  会话模式下关闭浏览器会删除cookie
         cookie.setMaxAge(-1);
         cookie.setPath("/");
         response.addCookie(cookie);
     }
 
+    /**
+     * 根据 token 获取 redis 中的 TokenUserInfoDto
+     * @return
+     */
+    protected TokenUserInfoDto getTokenUserInfoDto() {
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        String token = request.getHeader(Constants.TOKEN_ADMIN);
+        return redisComponent.getTokenInfo(token);
+    }
 
     protected void cleanCookie(HttpServletResponse response) {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();

@@ -5,8 +5,8 @@ import com.easylive.entity.config.AppConfig;
 import com.easylive.entity.constants.Constants;
 import com.easylive.entity.constants.ExceptionConstants;
 import com.easylive.entity.dto.TokenUserInfoDto;
+import com.easylive.entity.vo.ResponseVO;
 import com.easylive.exception.BaseException;
-import com.easylive.result.Result;
 import com.easylive.service.UserInfoService;
 import com.easylive.utils.StringTools;
 import com.wf.captcha.SpecCaptcha;
@@ -19,10 +19,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +38,7 @@ public class AccountController extends ABaseController {
     private AppConfig appConfig;
 
     @RequestMapping("/checkCode")
-    public Result checkCode() {
+    public ResponseVO checkCode() {
         // 改用 SpecCaptcha 或 GiftCaptcha，它们不使用 ScriptEngine
         SpecCaptcha captcha = new SpecCaptcha(130, 48, 5);
         String code = captcha.text();
@@ -50,12 +47,12 @@ public class AccountController extends ABaseController {
         Map<String, String> result = new HashMap<>();
         result.put("checkCode", checkCodeBase64);
         result.put("checkCodeKey", checkCodeKey);
-        return Result.success(result);
+        return getSuccessResponseVO(result);
     }
 
 
     @RequestMapping("/login")
-    public Result login(HttpServletRequest request,
+    public ResponseVO login(HttpServletRequest request,
                         HttpServletResponse response,
                         @NotEmpty String account,
                         @NotEmpty String password,
@@ -70,7 +67,7 @@ public class AccountController extends ABaseController {
             }
             String token = redisComponent.saveToKenInfo4Admin(account);
             saveToken2Cookie(response, token);
-            return Result.success(account);
+            return getSuccessResponseVO(account);
         } finally {
             redisComponent.cleanCheckCode(checkCodeKey);
             Cookie[] cookies = request.getCookies();
@@ -89,8 +86,8 @@ public class AccountController extends ABaseController {
     }
 
     @RequestMapping("/logout")
-    public Result logout(HttpServletResponse response) {
+    public ResponseVO logout(HttpServletResponse response) {
         cleanCookie(response);
-        return Result.success(null);
+        return getSuccessResponseVO(null);
     }
 }
