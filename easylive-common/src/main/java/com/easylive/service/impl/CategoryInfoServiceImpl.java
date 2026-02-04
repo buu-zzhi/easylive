@@ -1,9 +1,14 @@
 package com.easylive.service.impl;
 
 
+import java.util.ArrayList;
 import java.util.List;
+
+import com.easylive.component.RedisComponent;
+import com.easylive.entity.constants.Constants;
 import com.easylive.entity.query.SimplePage;
 import com.easylive.entity.enums.PageSize;
+import com.easylive.exception.BusinessException;
 import com.easylive.mapper.CategoryInfoMapper;
 import com.easylive.service.CategoryInfoService;
 import com.easylive.entity.vo.PaginationResultVO;
@@ -22,12 +27,30 @@ public class CategoryInfoServiceImpl implements CategoryInfoService{
 	@Resource
 	private CategoryInfoMapper<CategoryInfo, CategoryInfoQuery> categoryInfoMapper;
 
+    @Resource
+    private RedisComponent redisComponent;
 	/**
  	 * 根据条件查询列表
  	 */
 	@Override
 	public List<CategoryInfo> findListByParam(CategoryInfoQuery query) {
-		return this.categoryInfoMapper.selectList(query);	}
+        List<CategoryInfo> categoryInfoList = categoryInfoMapper.selectList(query);
+        if (query.getConvert2Tree()!=null&&query.getConvert2Tree()) {
+            categoryInfoList = convertLine2Tree(categoryInfoList, Constants.DEFAULT_PID);
+        }
+		return categoryInfoList;
+    }
+
+    private List<CategoryInfo> convertLine2Tree(List<CategoryInfo> dataList, Integer pid) {
+        List<CategoryInfo> children = new ArrayList<>();
+        for (CategoryInfo m: dataList) {
+            if (m.getCategoryId() != null && m.getPCategoryId() != null && m.getPCategoryId().equals(pid)) {
+                m.setChildren(convertLine2Tree(dataList, m.getCategoryId()));
+                children.add(m);
+            }
+        }
+        return children;
+    }
 
 	/**
  	 * 根据条件查询数量
@@ -121,4 +144,63 @@ public class CategoryInfoServiceImpl implements CategoryInfoService{
 	@Override
 	public Integer deleteCategoryInfoByCategoryCode(String categoryCode) {
 		return this.categoryInfoMapper.deleteByCategoryCode(categoryCode);}
+
+    @Override
+    public void saveCategory(CategoryInfo bean) {
+        CategoryInfo dbBean = categoryInfoMapper.selectByCategoryCode(bean.getCategoryCode());
+        if (bean.getCategoryId() == null && dbBean != null ||
+            bean.getCategoryId() != null && dbBean != null && !dbBean.getCategoryId().equals(bean.getCategoryId())) {
+            throw new BusinessException("分类编号已经存在");
+        }
+        if (bean.getCategoryId() == null) {
+            Integer maxSort = categoryInfoMapper.selectMaxSort(bean.getPCategoryId());
+            bean.setSort(maxSort + 1);
+            categoryInfoMapper.insert(bean);
+        } else {
+            categoryInfoMapper.updateByCategoryId(bean, bean.getCategoryId());
+        }
+        save2Redis();
+    }
+
+    @Override
+    public void delCategory(Integer categoryId) {
+        //TODO 查询分类下是否有视频
+        CategoryInfoQuery categoryInfoQuery = new CategoryInfoQuery();
+        categoryInfoQuery.setCategoryIdOrPCategoryId(categoryId);
+        categoryInfoMapper.deleteByParam(categoryInfoQuery);
+        save2Redis();
+    }
+
+    @Override
+    public void changeSort(Integer pCategoryId, String categoryIds) {
+        String[] categoryIdArray = categoryIds.split(",");
+        List<CategoryInfo> categoryInfoList = new ArrayList<>();
+        Integer sort = 1;
+        for (String categoryId : categoryIdArray) {
+            CategoryInfo categoryInfo = new CategoryInfo();
+            categoryInfo.setCategoryId(Integer.parseInt(categoryId));
+            categoryInfo.setPCategoryId(pCategoryId);
+            categoryInfo.setSort(++sort);
+            categoryInfoList.add(categoryInfo);
+        }
+        categoryInfoMapper.updateSortBatch(categoryInfoList);
+        save2Redis();
+    }
+
+    private void save2Redis() {
+        CategoryInfoQuery query = new CategoryInfoQuery();
+        query.setOrderBy("sort asc");
+        query.setConvert2Tree(true);
+        List<CategoryInfo> categoryInfoList = findListByParam(query);
+        redisComponent.saveCategoryList(categoryInfoList);
+    }
+
+    @Override
+    public List<CategoryInfo> getAllCategoryList() {
+        List<CategoryInfo> categoryInfoList = redisComponent.getCategoryList();
+        if (categoryInfoList.isEmpty()) {
+            save2Redis();
+        }
+        return redisComponent.getCategoryList();
+    }
 }

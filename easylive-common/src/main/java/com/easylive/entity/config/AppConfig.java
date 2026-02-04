@@ -14,6 +14,20 @@ public class AppConfig {
     @Value("${admin.password:}")
     private String adminPassword;
 
+    @Value("${showFFmpegLog:false}")
+    private Boolean showFFmpegLog;
+
+    @Value("${ffmpeg.path:}")
+    private String ffmpegPath;
+
+    public String getFfmpegPath() {
+        return ffmpegPath;
+    }
+
+    public Boolean getShowFFmpegLog() {
+        return showFFmpegLog;
+    }
+
     public String getProjectFolder() {
         return projectFolder;
     }

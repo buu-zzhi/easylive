@@ -40,7 +40,8 @@ public class AppInterceptor implements HandlerInterceptor {
         if (request.getRequestURL().toString().contains(URL_ACCOUNT)) {
             return true;
         }
-        String token = request.getHeader(Constants.TOKEN_ADMIN);
+//        String token = request.getHeader(Constants.TOKEN_ADMIN);
+        String token = getTokenFromCookie(request);
         if (request.getRequestURL().toString().contains(URL_FILE)) {
             // 如果是请求是获取图片 没有办法从 header 里拿到，只能从 cookie 中去获取
             token = getTokenFromCookie(request);

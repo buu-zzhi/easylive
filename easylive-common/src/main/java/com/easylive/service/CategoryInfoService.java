@@ -5,6 +5,10 @@ import java.util.List;
 import com.easylive.entity.vo.PaginationResultVO;
 import com.easylive.entity.po.CategoryInfo;
 import com.easylive.entity.query.CategoryInfoQuery;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 /**
  * @Description: 分类信息 Service
  * @Author: false
@@ -71,4 +75,12 @@ public interface CategoryInfoService{
  	 * 根据 CategoryCode 删除
  	 */
 	Integer deleteCategoryInfoByCategoryCode(String categoryCode);
+
+    void saveCategory(CategoryInfo categoryInfo);
+
+    void delCategory(Integer categoryId);
+
+    void changeSort(@NotNull Integer pCategoryId, @NotEmpty String categoryIds);
+
+    public List<CategoryInfo> getAllCategoryList();
 }

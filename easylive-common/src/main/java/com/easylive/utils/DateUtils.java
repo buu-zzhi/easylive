@@ -11,14 +11,14 @@ import java.util.Map;
  */
 public class DateUtils {
 
-    private static final Object lookObj = new Object();
+    private static final Object lockObj = new Object();
 
     private static Map<String, ThreadLocal<SimpleDateFormat>> sdfMap = new HashMap<>();
 
     private static SimpleDateFormat getSdf(final String pattern) {
         ThreadLocal<SimpleDateFormat> threadLocal = sdfMap.get(pattern);
         if (threadLocal == null) {
-            synchronized (lookObj) {
+            synchronized (lockObj) {
                 threadLocal = sdfMap.get(pattern);
                 if (threadLocal == null) {
                     threadLocal = new ThreadLocal<SimpleDateFormat>() {
@@ -27,6 +27,7 @@ public class DateUtils {
                             return new SimpleDateFormat(pattern);
                         }
                     };
+                    sdfMap.put(pattern, threadLocal);
                 }
             }
         }

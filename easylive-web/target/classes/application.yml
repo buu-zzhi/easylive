@@ -39,7 +39,7 @@ mybatis:
     map-underscore-to-camel-case: true
 
 project:
-  folder: D:/code/java/logInfo/easylive/
+  folder: D:/code/java_project/easylive/easylive/savefile/
 log:
   root:
     level: info
@@ -53,3 +53,6 @@ logging:
 admin:
   account: admin
   password: admin123
+
+ffmpeg:
+  path: C:\Users\liang\AppData\Local\Microsoft\WinGet\Links\ffmpeg.exe

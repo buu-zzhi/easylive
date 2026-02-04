@@ -3,11 +3,12 @@ package com.easylive.admin.controller;
 import com.easylive.component.RedisComponent;
 import com.easylive.entity.constants.Constants;
 import com.easylive.entity.dto.TokenUserInfoDto;
-import com.easylive.entity.vo.ResponseVO;;
+import com.easylive.entity.vo.ResponseVO;
 
 import com.easylive.entity.enums.ResponseCodeEnum;
 import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;;import javax.annotation.Resource;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

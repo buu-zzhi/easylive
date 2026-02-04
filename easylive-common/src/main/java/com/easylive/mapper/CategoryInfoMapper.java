@@ -1,6 +1,11 @@
 package com.easylive.mapper;
 
+import com.easylive.entity.po.CategoryInfo;
+import com.easylive.entity.query.CategoryInfoQuery;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
  * @Description: 分类信息 Mapper
@@ -39,4 +44,10 @@ public interface CategoryInfoMapper<T, P> extends BaseMapper {
  	 */
 	Integer deleteByCategoryCode(@Param("categoryCode")String categoryCode);
 
+    @Select("select ifnull(max(sort),0) from category_info where p_category_id=#{pCategoryId}")
+    Integer selectMaxSort(@Param("pCategoryId")Integer pCategoryId);
+
+    void deleteByParam(@Param("query") CategoryInfoQuery categoryInfoQuery);
+
+    void updateSortBatch(@Param("categoryInfoList") List<CategoryInfo> categoryInfoList);
 }

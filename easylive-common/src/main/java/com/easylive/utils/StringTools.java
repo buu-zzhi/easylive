@@ -40,6 +40,33 @@ public class StringTools {
         return StringTools.isEmpty(originString) ? null : DigestUtils.md5DigestAsHex(originString.getBytes());
     }
 
+    public static boolean pathIsOk(String path) {
+        if (StringTools.isEmpty(path)) {
+            return true;
+        }
+        if (path.contains("../") || path.contains("..\\")) {
+            return false;
+        }
+        return true;
+    }
+
+    public static String getFileSuffix(String fileName) {
+        if (StringTools.isEmpty(fileName) || !fileName.contains(".")) {
+            return null;
+        }
+        String suffix = fileName.substring(fileName.lastIndexOf("."));
+        return suffix;
+    }
+
+    public static String getFileName(String fileName) {
+        if (StringTools.isEmpty(fileName) || !fileName.contains(".")) {
+            return null;
+        }
+        String fn = fileName.substring(0, fileName.lastIndexOf("."));
+        return fn;
+    }
+
+
 
     public static void main(String[] args) {
         System.out.println(UpperCaseFirstLetter("application"));

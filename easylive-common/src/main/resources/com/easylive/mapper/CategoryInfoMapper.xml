@@ -49,6 +49,9 @@
 		<if test=" query.sort != null">
 			and sort= #{query.sort}
 		</if>
+        <if test="query.categoryIdOrPCategoryId != null">
+            and category_id = #{query.categoryIdOrPCategoryId} or p_category_id = #{query.categoryIdOrPCategoryId}
+        </if>
 	</sql>
 
 	<!-- 扩展查询条件 -->
@@ -65,6 +68,9 @@
 		<if test=" query.backgroundFuzzy != null and query.backgroundFuzzy!= null ">
 			and background like concat('%', #{query.backgroundFuzzy}, '%')
 		</if>
+		<if test="query.categoryIdOrPCategoryId != null">
+            and category_id = #{query.categoryIdOrPCategoryId} or p_category_id = #{query.categoryIdOrPCategoryId}
+        </if>
 	</sql>
 
 	<!-- 通用查询条件 -->
@@ -318,10 +324,21 @@
 		</set>
 		where category_code =#{categoryCode}
 	</update>
+    <update id="updateSortBatch">
+        <foreach collection="categoryInfoList" separator=";" item="item">
+            update category_info set sort=#{item.sort} where category_id=#{item.categoryId} and p_category_id=#{item.pCategoryId}
+        </foreach>
+    </update>
 
-	<!-- 根据 CategoryCode 删除 -->
+    <!-- 根据 CategoryCode 删除 -->
 	<delete id="deleteByCategoryCode">
 		delete from category_info where category_code =#{categoryCode}
 	</delete>
+    <delete id="deleteByParam">
+        delete from category_info
+        <where>
+            <include refid="base_query_condition"></include>
+        </where>
+    </delete>
 
 </mapper>

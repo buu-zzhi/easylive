@@ -51,8 +51,27 @@ public class CategoryInfoQuery extends BaseQuery {
  	 */
 	private Integer sort;
 
+    private Integer categoryIdOrPCategoryId;
 
-	public void setCategoryId(Integer categoryId) {
+    private Boolean convert2Tree;
+
+    public Boolean getConvert2Tree() {
+        return convert2Tree;
+    }
+
+    public void setConvert2Tree(Boolean convert2Tree) {
+        this.convert2Tree = convert2Tree;
+    }
+
+    public Integer getCategoryIdOrPCategoryId() {
+        return categoryIdOrPCategoryId;
+    }
+
+    public void setCategoryIdOrPCategoryId(Integer categoryIdOrPCategoryId) {
+        this.categoryIdOrPCategoryId = categoryIdOrPCategoryId;
+    }
+
+    public void setCategoryId(Integer categoryId) {
 		this.categoryId = categoryId;
 	}
 
